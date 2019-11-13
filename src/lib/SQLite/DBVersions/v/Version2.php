@@ -23,16 +23,16 @@ class Version2 extends aVersion
                       )';
 
         $commands[] = 'CREATE TABLE IF NOT EXISTS calendar (
-                    `service_id` VARCHAR(20) PRIMARY KEY ,
+                    `service_id` VARCHAR(100) PRIMARY KEY ,
                     `active_days`  VARCHAR (8) NOT NULL DEFAULT "0000000",
                     `start_day`  INTEGER NOT NULL DEFAULT 0,
                     `end_day` INTEGER NOT NULL DEFAULT 0
                     )';
 
         $commands[] = 'CREATE TABLE IF NOT EXISTS trips (
-                        `id` VARCHAR(30) PRIMARY KEY,
+                        `trip_id` VARCHAR(50) PRIMARY KEY,
                         `route_id` VARCHAR(5) NOT NULL,
-                        `service_id` VARCHAR(20) NOT NULL,
+                        `service_id` VARCHAR(100) NOT NULL,
                         `trip_headsign` VARCHAR(50) NOT NULL,
                         `direction_id` INTEGER NOT NULL,
                         `block_id` VARCHAR(10) NOT NULL,

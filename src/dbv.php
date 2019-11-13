@@ -1,2 +1,2 @@
 <?php
-define('DB_VERSION', 2);
+define('DB_VERSION', 3);

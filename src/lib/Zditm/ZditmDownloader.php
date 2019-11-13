@@ -7,6 +7,7 @@ use SzczecinInTouch\mappers\Zditm\Calendar;
 use SzczecinInTouch\mappers\Zditm\CalendarDates;
 use SzczecinInTouch\mappers\Zditm\Lines;
 use SzczecinInTouch\mappers\Zditm\LineTypes;
+use SzczecinInTouch\mappers\Zditm\Trips;
 use ZipArchive;
 
 class ZditmDownloader
@@ -17,6 +18,7 @@ class ZditmDownloader
     const DATA_META_FILE = 'zditm_meta.dat';
     const DATA_UNZIP_DIR = 'unzipped/';
     const DATA_UNZIPPED_LINES_FILE = 'unzipped/routes.txt';
+    const DATA_UNZIPPED_TRIPS_FILE = 'unzipped/trips.txt';
     const DATA_UNZIPPED_CALENDAR_DATES_FILE = 'unzipped/calendar_dates.txt';
     const DATA_UNZIPPED_CALENDAR_FILE = 'unzipped/calendar.txt';
 
@@ -97,17 +99,36 @@ class ZditmDownloader
         }
     }
 
+    private function updateTrips()
+    {
+        $fp = fopen(DATA_DIR . self::DATA_UNZIPPED_TRIPS_FILE, 'rw');
+        fgetcsv($fp); //Pierwsza linia pomijamy
+        $tripsMapper = new Trips();
+        while ($row = fgetcsv($fp)) {
+            $tripsMapper->add([
+                'route_id' => $row[0],
+                'service_id' => $row[1],
+                'trip_id' => $row[2],
+                'trip_headsign' => $row[3],
+                'direction_id' => $row[4],
+                'block_id' => $row[5],
+                'shape_id' => $row[6],
+                'wheelchair_accessible' => $row[7],
+                'low_floor' => $row[8]
+            ]);
+        }
+    }
+
     private function updateCalendarDates()
     {
-        $fp = fopen(DATA_DIR . self::DATA_UNZIPPED_LINES_FILE, 'rw');
+        $fp = fopen(DATA_DIR . self::DATA_UNZIPPED_CALENDAR_DATES_FILE, 'rw');
         fgetcsv($fp); //Pierwsza linia pomijamy
         $linesMapper = new CalendarDates();
         while ($row = fgetcsv($fp)) {
             $linesMapper->add([
-                'id' => $row[0],
-                'number' => $row[1],
-                'name' => $row[2],
-                'type' => LineTypes::getLineTypeName(intval($row[4]))
+                'service_id' => $row[0],
+                'date' => $row[1],
+                'exception_type' => (int) $row[2]
             ]);
         }
     }
@@ -138,11 +159,14 @@ class ZditmDownloader
     private function update()
     {
         if ($this->isDataFromToday()) {
+            ini_set('max_execution_time', 3600);
             $this->download();
             $this->unzip();
+            $this->updateLines();
+            $this->updateCalendar();
+            $this->updateCalendarDates();
+            $this->updateTrips();
         }
-        $this->updateLines();
-        $this->updateCalendar();
     }
 
     public function getLines(): array
