@@ -1,0 +1,4 @@
+*.db
+vendor
+src/data
+*.log
