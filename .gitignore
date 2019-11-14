@@ -2,5 +2,6 @@
 vendor
 src/data
 *.log
-.idea
+\.idea
 droptables
+src/sqlite_szczecin_in_touch.db-journal

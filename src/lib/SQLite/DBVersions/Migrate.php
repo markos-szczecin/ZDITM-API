@@ -4,6 +4,8 @@
 namespace SzczecinInTouch\lib\SQLite\DBVersions;
 
 
+use SzczecinInTouch\lib\SQLite\SQLiteDB;
+
 class Migrate
 {
 
@@ -30,10 +32,13 @@ class Migrate
     }
 
     /**
-     * Ladowanie instancji VersionX
+     * Ładowanie instancji VersionX
+     *
+     * @param bool $loadAll
      */
-    private function loadVersions()
+    private function loadVersions(bool $loadAll = false)
     {
+        $this->versionClasses = [];
         $vDir = scandir(__DIR__ . '/v');
         foreach ($vDir as $file) {
             if ($file === '.' || $file === '..') {
@@ -42,7 +47,7 @@ class Migrate
             $class = 'SzczecinInTouch\\lib\\SQLite\\DBVersions\\v\\' . basename($file, '.php');
             /** @var aVersion $obj */
             $obj = new $class();
-            if (DB_VERSION < $obj->getVersion()) {
+            if ($loadAll || DB_VERSION < $obj->getVersion()) {
                 $this->versionClasses[] = $obj;
             }
         }
@@ -62,5 +67,19 @@ class Migrate
         $this->updateCurrentVersion();
 
         return $this;
+    }
+
+    /**
+     * Stworzenie tymczasowej bazy danych na czas aktualizacji rozkladu jazdy
+     */
+    public function migrateTempBase()
+    {
+        SQLiteDB::updateModeOn();
+        $this->loadVersions(true);
+        foreach ($this->versionClasses as $class) {
+            $class->query();
+            $this->loadedVersion = $class->getVersion();
+        }
+        SQLiteDB::updateModeOff();
     }
 }

@@ -7,6 +7,7 @@ define('DB_HOST', '');
 define("DB_USER", '');
 define('DB_PASS', '');
 define('SQL_LITE_DB', 'sqlite_szczecin_in_touch.db');
+define('SQL_LITE_DB_FOR_UPDATE', 'sqlite_szczecin_in_touch_temp.db');
 define('ROOT', $_SERVER['DOCUMENT_ROOT']);
 define('CONFIG_PATH', __DIR__ . '/config.php');
 define('DBV_PATH', __DIR__ . '/dbv.php');

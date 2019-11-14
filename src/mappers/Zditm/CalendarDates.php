@@ -18,7 +18,7 @@ class CalendarDates extends Mapper
         return $type === self::EXCEPTION_SERVICE_ADDED || $type === self::EXCEPTION_SERVICE_REMOVED;
     }
 
-    public function add(array $params)
+    public function add(array $params): bool
     {
         $q = 'REPLACE INTO calendar_dates (service_id, date, exception_type) VALUES (:service_id, :date, :exception_type)';
         try {
@@ -35,5 +35,7 @@ class CalendarDates extends Mapper
 
             return false;
         }
+
+        return true;
     }
 }

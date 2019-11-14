@@ -1,11 +1,8 @@
 <?php
 
-use DI\Container;
-use Psr\Container\ContainerInterface;
 use Slim\Factory\AppFactory;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Psr7\Response;
 use SzczecinInTouch\Lib\Logger;
 use SzczecinInTouch\lib\Response as MyResponse;
 use SzczecinInTouch\Controllers\ZditmController;
@@ -24,6 +21,9 @@ if (!defined('ENV') || ENV !== 'dev') {
     $app->addErrorMiddleware(false, true, true);
     error_reporting(0);
 }
+use SzczecinInTouch\lib\Zditm\ZditmUpdater;
+
+//ZditmUpdater::get()->update();
 
 $app->add(function (Request $request, RequestHandler $handler) {
     //Authorization

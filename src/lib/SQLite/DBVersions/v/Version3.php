@@ -16,6 +16,12 @@ class Version3 extends aVersion
                         `date` INTEGER NOT NULL,
                         `exception_type` INTEGER(1)
                       )';
+        $commands[] = 'CREATE TABLE IF NOT EXISTS shapes (
+                        `shape_id`INTEGER NOT NULL,
+                        `shape_pt_lat` REAL NOT NULL,
+                        `shape_pt_lon` REAL NOT NULL,
+                        `shape_pt_sequence` INTEGER NOT NULL
+                      )';
         foreach ($commands as $command) {
             if (false === $this->getDB()->exec($command)) {
                 print_r($this->getDB()->errorInfo()) . PHP_EOL;

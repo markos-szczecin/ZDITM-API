@@ -10,15 +10,15 @@ use SzczecinInTouch\mappers\Mapper;
 
 class Trips extends Mapper
 {
-    private function checkParams(&$params)
+    private function correctParams(&$params)
     {
         $params['low_floor'] = isset($params['low_floor']) && intval($params['low_floor']) === 1 ? 1 : 0;
         $params['wheelchair_accessible'] = isset($params['wheelchair_accessible']) &&  intval($params['wheelchair_accessible']) === 1 ? 1 : 0;
     }
 
-    public function add(array $params)
+    public function add(array $params): bool
     {
-        $this->checkParams($params);
+        $this->correctParams($params);
         $q = 'REPLACE INTO trips (
                 trip_id,
                 route_id,
