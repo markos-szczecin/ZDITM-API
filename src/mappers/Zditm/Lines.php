@@ -19,7 +19,7 @@ class Lines extends Mapper
                     'id' => $row[0],
                     'number' => $row[1],
                     'name' => $row[2],
-                    'type' => LineTypes::getLineTypeName(intval($row[4]))
+                    'type' => $row[4]
                 ]);
             }
             $this->getDb()->getPDO()->query('COMMIT');

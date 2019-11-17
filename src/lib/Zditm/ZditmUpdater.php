@@ -5,6 +5,7 @@ namespace SzczecinInTouch\lib\Zditm;
 use Exception;
 use SzczecinInTouch\Lib\Logger;
 use SzczecinInTouch\lib\SQLite\SQLiteDB;
+use SzczecinInTouch\mappers\Mapper;
 use SzczecinInTouch\mappers\Zditm\Calendar;
 use SzczecinInTouch\mappers\Zditm\CalendarDates;
 use SzczecinInTouch\mappers\Zditm\Lines;
@@ -279,6 +280,11 @@ class ZditmUpdater
         }
     }
 
+    private function eraseOldData()
+    {
+        (new Mapper())->eraseAll();
+    }
+
     public function update()
     {
         SQLiteDB::updateModeOn();
@@ -287,6 +293,7 @@ class ZditmUpdater
             ini_set('max_execution_time', 300);
             if ($this->download()) {
                 $this->unzip();
+                $this->eraseOldData();
                 $this->updateLines();
                 $this->updateCalendar();
                 $this->updateCalendarDates();
