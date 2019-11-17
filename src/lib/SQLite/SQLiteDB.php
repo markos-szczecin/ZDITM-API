@@ -6,15 +6,16 @@ namespace SzczecinInTouch\lib\SQLite;
 
 use Generator;
 use PDO;
-use PDOStatement;
+use SQLite3;
+use SQLite3Stmt;
 
 class SQLiteDB
 {
-    /** @var PDOStatement */
+    /** @var SQLite3Stmt */
     private $statement;
     /**
      * PDO instance
-     * @var PDO
+     * @var SQLite3
      */
     private $pdo;
 
@@ -25,9 +26,9 @@ class SQLiteDB
 
     /**
      * return in instance of the PDO object that connects to the SQLite database
-     * @return PDO
+     * @return SQLite3
      */
-    public function connect()
+    public function connect(): SQLite3
     {
         if (!$this->pdo) {
             $this->getPDO();
@@ -43,16 +44,15 @@ class SQLiteDB
         return $ret === false ? -1 : intval($ret);
     }
 
-    public function getPDO(): PDO
+    public function getPDO(): SQLite3
     {
         if (!$this->pdo) {
             if (self::$mode === self::UPDATE_MODE) {
-                $this->pdo = new PDO("sqlite:" . SQL_LITE_DB_FOR_UPDATE);
+                $this->pdo = new SQLite3( SQL_LITE_DB_FOR_UPDATE);
             }  else {
-                $this->pdo = new PDO("sqlite:" . SQL_LITE_DB);
+                $this->pdo = new SQLite3(SQL_LITE_DB);
             }
         }
-
         return $this->pdo;
     }
 
@@ -69,13 +69,16 @@ class SQLiteDB
         foreach ($args as $key => $arg) {
             if (is_array($arg)) {
                 $inQuery = implode(',', array_fill(0, count($arg), '?'));
-                $this->statement->bindValue(':' . $key, $inQuery, PDO::PARAM_STR);
+                $this->statement->bindValue(':' . $key, $inQuery, SQLITE3_TEXT);
             } else {
                 $this->statement->bindValue(':' . $key, $arg, $types[$key]);
             }
         }
 
-        return $this->statement->execute();
+        if (!$this->statement->execute()) {
+            return false;
+        }
+        return true;
     }
 
     /**

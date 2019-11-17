@@ -30,7 +30,7 @@ class Version2 extends aVersion
                     )';
 
         $commands[] = 'CREATE TABLE IF NOT EXISTS trips (
-                        `trip_id` VARCHAR(50) PRIMARY KEY,
+                        `trip_id` VARCHAR(50) NOT NULL ,
                         `route_id` VARCHAR(5) NOT NULL,
                         `service_id` VARCHAR(100) NOT NULL,
                         `trip_headsign` VARCHAR(50) NOT NULL,
@@ -44,7 +44,7 @@ class Version2 extends aVersion
                         )';
         foreach ($commands as $command) {
             if (false === $this->getDB()->exec($command)) {
-                print_r($this->getDB()->errorInfo()) . PHP_EOL;
+                print_r($this->getDB()->lastErrorMsg() . PHP_EOL . $command) . PHP_EOL;
             }
         }
     }

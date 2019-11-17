@@ -66,12 +66,12 @@ class Calendar extends Mapper
     public function add(array $params): bool
     {
         {
-            $q = 'REPLACE INTO calendar (service_id, active_days, start_day, end_day) VALUES (:service_id, :active_days, :start_day, :end_day)';
+            $q = 'INSERT INTO calendar (service_id, active_days, start_day, end_day) VALUES (:service_id, :active_days, :start_day, :end_day)';
             try {
                 $this->query(
                     $q,
                     ['service_id' => $params['service_id'], 'active_days' => $this->convertToBitMask($params['active_days']), 'start_day' => $params['start_day'], 'end_day' => $params['end_day']],
-                    ['service_id' => \PDO::PARAM_STR, 'active_days' => \PDO::PARAM_STR, 'start_day' => \PDO::PARAM_INT, 'end_day' => \PDO::PARAM_INT]
+                    ['service_id' => SQLITE3_TEXT, 'active_days' => SQLITE3_TEXT, 'start_day' => SQLITE3_INTEGER, 'end_day' => SQLITE3_INTEGER]
                 );
             } catch (Exception $e) {
                 Logger::errorLog($e->getMessage());
@@ -80,6 +80,30 @@ class Calendar extends Mapper
             }
 
             return true;
+        }
+    }
+
+    public function addFromCsv($fileHandler)
+    {
+        if (is_resource($fileHandler)) {
+            $this->getDb()->getPDO()->query('BEGIN');
+            while ($row = fgetcsv($fileHandler)) {
+                $this->add([
+                    'service_id' => $row[0],
+                    'active_days' => [
+                        $row[1] ? Calendar::MONDAY_NUM : 0,
+                        $row[2] ? Calendar::TUESDAY_NUM : 0,
+                        $row[3] ? Calendar::WEDNESDAY_NUM : 0,
+                        $row[4] ? Calendar::THURSDAY_NUM : 0,
+                        $row[5] ? Calendar::FRIDAY_NUM : 0,
+                        $row[6] ? Calendar::SATURDAY_NUM : 0,
+                        $row[7] ? Calendar::SUNDAY_NUM : 0
+                    ],
+                    'start_day' => strtotime($row[8]),
+                    'end_day' => strtotime($row[9])
+                ]);
+            }
+            $this->getDb()->getPDO()->query('COMMIT');
         }
     }
 }

@@ -9,6 +9,7 @@ use SzczecinInTouch\lib\SQLite\SQLiteDB;
 
 abstract class Mapper
 {
+    protected $transaction = false;
     /** @var SQLiteDB  */
     protected static $db;
 
@@ -19,7 +20,7 @@ abstract class Mapper
         }
     }
 
-    protected function getDb(): SQLiteDB
+    public function getDb(): SQLiteDB
     {
         if (!self::$db) {
             self::$db = new SQLiteDB();
@@ -38,7 +39,7 @@ abstract class Mapper
     protected final function query(string $query, array $args = [], array $types = []): void
     {
         if (!$this->getDb()->query($query, $args, $types)) {
-            throw new Exception(print_r($this->getDb()->getPDO()->errorInfo(), true));
+            throw new Exception(print_r($this->getDb()->getPDO()->lastErrorMsg() . PHP_EOL . $query, true));
         }
     }
 }

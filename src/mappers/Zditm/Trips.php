@@ -19,7 +19,7 @@ class Trips extends Mapper
     public function add(array $params): bool
     {
         $this->correctParams($params);
-        $q = 'REPLACE INTO trips (
+        $q = 'INSERT INTO trips (
                 trip_id,
                 route_id,
                 service_id,
@@ -55,15 +55,15 @@ class Trips extends Mapper
                     'wheelchair_accessible' => $params['wheelchair_accessible']
                 ],
                 [
-                    'trip_id' => \PDO::PARAM_STR,
-                    'route_id' => \PDO::PARAM_STR,
-                    'service_id' => \PDO::PARAM_STR,
-                    'direction_id' => \PDO::PARAM_INT,
-                    'trip_headsign' => \PDO::PARAM_STR,
-                    'block_id' => \PDO::PARAM_STR,
-                    'shape_id' => \PDO::PARAM_STR,
-                    'low_floor' => \PDO::PARAM_INT,
-                    'wheelchair_accessible' => \PDO::PARAM_INT
+                    'trip_id' => SQLITE3_TEXT,
+                    'route_id' => SQLITE3_TEXT,
+                    'service_id' => SQLITE3_TEXT,
+                    'direction_id' => SQLITE3_INTEGER,
+                    'trip_headsign' => SQLITE3_TEXT,
+                    'block_id' => SQLITE3_TEXT,
+                    'shape_id' => SQLITE3_TEXT,
+                    'low_floor' => SQLITE3_INTEGER,
+                    'wheelchair_accessible' => SQLITE3_INTEGER
                 ]
             );
         } catch (Exception $e) {
@@ -73,5 +73,26 @@ class Trips extends Mapper
         }
 
         return true;
+    }
+
+    public function addFromCsv($fileHandler)
+    {
+        if (is_resource($fileHandler)) {
+            $this->getDb()->getPDO()->query('BEGIN');
+            while ($row = fgetcsv($fileHandler)) {
+                $this->add([
+                    'route_id' => $row[0],
+                    'service_id' => $row[1],
+                    'trip_id' => $row[2],
+                    'trip_headsign' => $row[3],
+                    'direction_id' => $row[4],
+                    'block_id' => $row[5],
+                    'shape_id' => $row[6],
+                    'wheelchair_accessible' => $row[7],
+                    'low_floor' => $row[8]
+                ]);
+            }
+            $this->getDb()->getPDO()->query('COMMIT');
+        }
     }
 }

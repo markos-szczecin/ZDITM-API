@@ -18,14 +18,14 @@ class Shapes extends Mapper
     public function add(array $params)
     {
         try {
-            $q = 'REPLACE INTO shapes (shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence) VALUES (:shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence)';
+            $q = 'INSERT INTO shapes (shape_id, shape_pt_lat, shape_pt_lon, shape_pt_sequence) VALUES (:shape_id, :shape_pt_lat, :shape_pt_lon, :shape_pt_sequence)';
             if (!$this->validateParams($params)) {
                 throw new Exception('Wrong params: ' . print_r($params, true));
             }
             $this->query(
                 $q,
                 ['shape_id' => $params['shape_id'], 'shape_pt_lat' => $params['shape_pt_lat'], 'shape_pt_lon' => $params['shape_pt_lon'], 'shape_pt_sequence' => $params['shape_pt_sequence']],
-                ['shape_id' => \PDO::PARAM_INT, 'shape_pt_lat' => \PDO::PARAM_STR, 'shape_pt_lon' => \PDO::PARAM_STR, 'shape_pt_sequence' => \PDO::PARAM_STR]
+                ['shape_id' => SQLITE3_INTEGER, 'shape_pt_lat' => SQLITE3_TEXT, 'shape_pt_lon' => SQLITE3_TEXT, 'shape_pt_sequence' => SQLITE3_TEXT]
             );
         } catch (Exception $e) {
             Logger::errorLog($e->getMessage());
@@ -34,5 +34,21 @@ class Shapes extends Mapper
         }
 
         return true;
+    }
+
+    public function addFromCsv($fileHandler)
+    {
+        if (is_resource($fileHandler)) {
+            $this->getDb()->getPDO()->query('BEGIN');
+            while ($row = fgetcsv($fileHandler)) {
+                $this->add([
+                    'shape_id' => $row[0],
+                    'shape_pt_lat' => $row[1],
+                    'shape_pt_lon' => $row[2],
+                    'shape_pt_sequence' => $row[3]
+                ]);
+            }
+            $this->getDb()->getPDO()->query('COMMIT');
+        }
     }
 }

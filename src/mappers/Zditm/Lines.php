@@ -10,6 +10,22 @@ use SzczecinInTouch\mappers\Mapper;
 
 class Lines extends Mapper
 {
+    public function addFromCsv($fileHandler)
+    {
+        if (is_resource($fileHandler)) {
+            $this->getDb()->getPDO()->query('BEGIN');
+            while ($row = fgetcsv($fileHandler)) {
+                $this->add([
+                    'id' => $row[0],
+                    'number' => $row[1],
+                    'name' => $row[2],
+                    'type' => LineTypes::getLineTypeName(intval($row[4]))
+                ]);
+            }
+            $this->getDb()->getPDO()->query('COMMIT');
+        }
+    }
+
     /**
      * @param array $params
      *
@@ -17,18 +33,19 @@ class Lines extends Mapper
      */
     public function add(array $params): bool
     {
-        $q = 'REPLACE INTO lines (id, number, name, type) VALUES (:id, :number, :name, :type)';
+        $q = 'INSERT INTO lines (id, number, name, type) VALUES (:id, :number, :name, :type)';
         try {
             $params['type'] = LineTypes::getLineTypeName((int) $params['type']);
             if (!$params['type']) {
                 throw new Exception('Unsupported line type ' . $params['type']);
             }
+
             $this->query(
                 $q,
                 ['id' => $params['id'], 'number' => $params['number'], 'name' => $params['name'], 'type' => $params['type']],
-                ['id' => \PDO::PARAM_STR, 'number' => \PDO::PARAM_STR, 'name' => \PDO::PARAM_STR, 'type' => \PDO::PARAM_STR]
+                ['id' => SQLITE3_TEXT, 'number' => SQLITE3_TEXT, 'name' => SQLITE3_TEXT, 'type' => SQLITE3_TEXT]
             );
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Logger::errorLog($e->getMessage());
 
             return false;

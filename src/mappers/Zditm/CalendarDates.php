@@ -20,7 +20,7 @@ class CalendarDates extends Mapper
 
     public function add(array $params): bool
     {
-        $q = 'REPLACE INTO calendar_dates (service_id, date, exception_type) VALUES (:service_id, :date, :exception_type)';
+        $q = 'INSERT INTO calendar_dates (service_id, date, exception_type) VALUES (:service_id, :date, :exception_type)';
         try {
             if (!$this->checkExceptionType($params['exception_type'])) {
                 throw new Exception('Wrong exception_type ' . $params['exception_type']);
@@ -28,7 +28,7 @@ class CalendarDates extends Mapper
             $this->query(
                 $q,
                 ['service_id' => $params['service_id'], 'date' => $params['date'], 'exception_type' => $params['exception_type']],
-                ['service_id' => \PDO::PARAM_STR, 'date' => \PDO::PARAM_INT, 'exception_type' => \PDO::PARAM_INT]
+                ['service_id' => SQLITE3_TEXT, 'date' => SQLITE3_INTEGER, 'exception_type' => SQLITE3_INTEGER]
             );
         } catch (Exception $e) {
             Logger::errorLog($e->getMessage());
@@ -37,5 +37,20 @@ class CalendarDates extends Mapper
         }
 
         return true;
+    }
+
+    public function addFromCsv($fileHandler)
+    {
+        if (is_resource($fileHandler)) {
+            $this->getDb()->getPDO()->query('BEGIN');
+            while ($row = fgetcsv($fileHandler)) {
+                $this->add([
+                    'service_id' => $row[0],
+                    'date' => $row[1],
+                    'exception_type' => (int) $row[2]
+                ]);
+            }
+            $this->getDb()->getPDO()->query('COMMIT');
+        }
     }
 }

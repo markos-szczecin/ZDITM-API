@@ -6,7 +6,8 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "php-di/php-di": "^6.0",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-sqlite3": "*"
     },
     "autoload": {
         "psr-4": { "SzczecinInTouch\\": "src/" }

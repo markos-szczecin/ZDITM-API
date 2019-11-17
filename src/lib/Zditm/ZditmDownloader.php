@@ -6,7 +6,12 @@ use SzczecinInTouch\mappers\Zditm\Lines;
 
 class ZditmDownloader
 {
-    public function getLines(): array
+    /**
+     * Dane o liniach autobusowych i tramwajowych
+     *
+     * @return array
+     */
+    private function getLines(): array
     {
         static $linesData;
 
@@ -17,6 +22,11 @@ class ZditmDownloader
         return (array) $linesData;
     }
 
+    /**
+     * Nr lini pogrupowane na tramwaje i autobusy
+     *
+     * @return array
+     */
     public function getLinesNumbers(): array
     {
         $lines = [];

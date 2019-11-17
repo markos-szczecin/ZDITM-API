@@ -7,7 +7,7 @@ use SzczecinInTouch\lib\SQLite\SQLiteDB;
 
 abstract class aVersion
 {
-    /** @var null|PDO */
+    /** @var null|SQLiteDB */
     protected static $db;
     /** @var int  */
     protected $v = 1;
@@ -15,9 +15,9 @@ abstract class aVersion
     abstract public function query();
 
     /**
-     * @return PDO
+     * @return \SQLite3
      */
-    protected function getDB(): PDO
+    protected function getDB(): \SQLite3
     {
         if (!self::$db) {
             self::$db = new SQLiteDB();
