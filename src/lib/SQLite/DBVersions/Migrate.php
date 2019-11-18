@@ -3,19 +3,15 @@
 
 namespace SzczecinInTouch\lib\SQLite\DBVersions;
 
-
-use SzczecinInTouch\lib\SQLite\SQLiteDB;
-
 class Migrate
 {
-
     private $loadedVersion = null;
 
     /** @var aVersion[] */
     private $versionClasses = [];
 
     /**
-     * Aktualizacja wersji bazy w dbv.php
+     * Update db version in config (dbv.php) file
      *
      * @return Migrate
      */
@@ -32,7 +28,7 @@ class Migrate
     }
 
     /**
-     * Ładowanie instancji VersionX
+     * Load "VersionX" instances
      *
      * @param bool $loadAll
      */
@@ -54,7 +50,8 @@ class Migrate
     }
 
     /**
-     * Aktualizacja bazy danych wg plików Version[X].php
+     * Update database structure based on "Version[X].php" files
+     *
      * @return Migrate
      */
     public function migrate(): Migrate
@@ -70,7 +67,7 @@ class Migrate
     }
 
     /**
-     * Stworzenie tymczasowej bazy danych na czas aktualizacji rozkladu jazdy
+     * Create temporary database for timetable update process
      */
     public function migrateTempBase()
     {

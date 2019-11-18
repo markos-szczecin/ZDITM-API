@@ -15,7 +15,10 @@ class Logger
     private function __construct()
     {}
 
-    private static function getInstance()
+    /**
+     * @return \Monolog\Logger
+     */
+    private static function getInstance(): \Monolog\Logger
     {
         if (!self::$instance) {
             self::$instance = new \Monolog\Logger('logs', [], [new WebProcessor(), new MemoryPeakUsageProcessor()]);
@@ -24,11 +27,17 @@ class Logger
         return self::$instance;
     }
 
+    /**
+     * @return string
+     */
     private static function getDir(): string
     {
         return $_SERVER['DOCUMENT_ROOT'] . '/logs/';
     }
 
+    /**
+     * @param \Exception $e
+     */
     public static function logException(\Exception $e)
     {
         $dir = self::getDir();
@@ -41,6 +50,12 @@ class Logger
         file_put_contents($dir . 'logger_exceptions.log', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
     }
 
+    /**
+     * @param $message
+     * @param array $context
+     *
+     * @return bool
+     */
     public static function errorLog($message, array $context = []): bool
     {
         try {

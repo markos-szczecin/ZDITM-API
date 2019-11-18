@@ -18,7 +18,7 @@ class ZditmController extends BaseController
         $this->zditmDownloader = new ZditmDownloader();
     }
     /**
-     * Pobranie nr linii
+     * Get available line numbers - GET
      *
      * @param Request $request
      * @param Response $response
@@ -33,9 +33,8 @@ class ZditmController extends BaseController
         return $response;
     }
 
-
     /**
-     * Pobranie szczegółów lini
+     * Get line details - GET
      *
      * @param Request $request
      * @param Response $response
@@ -58,34 +57,29 @@ class ZditmController extends BaseController
     }
 
     /**
-     * Zgłoszenie opóźnienia
+     * Get line details - POST
      *
      * @param Request $request
      * @param Response $response
+     * @param array $args
+     *
+     * @throws ZditmException
      */
-    public function delay(Request $request, Response $response)
+    public function lineWithAuth(Request $request, Response $response, array $args)
     {
-
+       return $this->line($request, $response, $args);
     }
 
+
     /**
-     * Zgłoszenie awarii
+     * Get available line numbers - POST
      *
      * @param Request $request
      * @param Response $response
+     * @return Response
      */
-    public function issue(Request $request, Response $response)
+    public function linesNumbersWithAuth(Request $request, Response $response)
     {
-
-    }
-
-    /**
-     * Przeanalizowanie przystanków w określonym promieniu i znalezienie autobusów i tramwajów w ciągu najbliższych minut
-     * @param Request $request
-     * @param Response $response
-     */
-    public function analyzeNearestStops(Request $request, Response $response)
-    {
-
+        return $this->linesNumbers($request, $response);
     }
 }

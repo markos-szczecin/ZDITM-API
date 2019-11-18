@@ -4,6 +4,7 @@ namespace SzczecinInTouch\lib\Zditm;
 
 use Exception;
 use SzczecinInTouch\Lib\Logger;
+use SzczecinInTouch\lib\SQLite\DBVersions\Migrate;
 use SzczecinInTouch\lib\SQLite\SQLiteDB;
 use SzczecinInTouch\mappers\Mapper;
 use SzczecinInTouch\mappers\Zditm\Calendar;
@@ -41,7 +42,7 @@ class ZditmUpdater
 
     private function __construct()
     {
-        (new \SzczecinInTouch\lib\SQLite\DBVersions\Migrate())->migrateTempBase();
+        (new Migrate())->migrateTempBase();
     }
 
     public static function get(): ZditmUpdater
@@ -54,7 +55,7 @@ class ZditmUpdater
     }
 
     /**
-     * Dane o ostatniej aktualizacji oraz skrót z ostatnio pobranych danych
+     * Get data of last download time and hash of last downloaded data
      *
      * @return array
      */
@@ -76,18 +77,17 @@ class ZditmUpdater
     }
 
     /**
-     * Czy czas ostatniego pobrania jest conajmniej ze wczoraj
+     * Was last download yesterday
      *
      * @return bool
      */
     private function isTimeToUpdate(): bool
     {
-        return true;
         return $this->getMetaData()['last_download_time'] < strtotime('-1 day' . date('Y-m-d 23:59:59'));
     }
 
     /**
-     * Aktualizacja daty ostatniego pobrania oraz skrótu z danych
+     * Update last download time and hash of last downloaded data
      *
      * @param string $hash
      */
@@ -100,7 +100,7 @@ class ZditmUpdater
     }
 
     /**
-     * Czy dostępny online rozklad jest inny od pobranego
+     * Is new timetable available - comparing hashes
      *
      * @param string $newHash
      *
@@ -108,15 +108,14 @@ class ZditmUpdater
      */
     private function isNewTimetableAvailable(string $newHash): bool
     {
-        return $this->getMetaData()['hash'] !== $newHash;
+        return $this->getMetaData()['data_hash'] !== $newHash;
     }
 
     /**
-     * @return bool - czy pobrano nową wersję rozkładu
+     * @return bool - Is downloaded timetable newer then current
      */
     private function download(): bool
     {
-        return true;
         $zip = (string) file_get_contents(self::$zditmUrl);
         $hash = sha1($zip);
         if (!$this->isNewTimetableAvailable($hash)) {
@@ -129,7 +128,7 @@ class ZditmUpdater
     }
 
     /**
-     * Rozpakowanie pobranych danych
+     * Unzip downloaded data
      *
      * @return bool
      */
@@ -147,7 +146,7 @@ class ZditmUpdater
     }
 
     /**
-     * Aktualizacja linii autobusowych i tramwajowych
+     * Update data about available trams and buses
      */
     private function updateLines()
     {
@@ -162,7 +161,7 @@ class ZditmUpdater
     }
 
     /**
-     * Aktaulizacja tras
+     * Updates trips
      */
     private function updateTrips()
     {
@@ -176,7 +175,7 @@ class ZditmUpdater
     }
 
     /**
-     * Aktualizacja wyjątków w rozkładzie jazdy
+     * Update exceptions in timetable
      */
     private function updateCalendarDates()
     {
@@ -191,7 +190,7 @@ class ZditmUpdater
     }
 
     /**
-     * Aktaulizacja współrzędnych geograficznych tras
+     * Update routes coordinates (point by point)
      */
     private function updateShapes()
     {
@@ -206,6 +205,8 @@ class ZditmUpdater
     }
 
     /**
+     * Open specific file
+     *
      * @param string $filePath
      *
      * @return resource
@@ -222,7 +223,7 @@ class ZditmUpdater
     }
 
     /**
-     * Dane o przystankach
+     * Update stops data (coordinates etc.)
      */
     private function updateStops()
     {
@@ -236,7 +237,7 @@ class ZditmUpdater
     }
 
     /**
-     * Dane o przystankach
+     * Update stop times data
      */
     private function updateStopTimes()
     {
@@ -251,7 +252,7 @@ class ZditmUpdater
     }
 
     /**
-     * Aktualizacja rozkładu jazdy
+     * Update timetable
      */
     private function updateCalendar()
     {
@@ -265,24 +266,31 @@ class ZditmUpdater
     }
 
     /**
-     * Zakończenie procesu aktualizacji - podmiana bazy danych i usunięcie tymczasowej
+     * Ending update process - switch databases names and remove temp database
      */
     public function switchBases()
     {
         if (file_exists(SQL_LITE_DB_FOR_UPDATE)) {
-            $s = microtime(true);
             if (copy(SQL_LITE_DB_FOR_UPDATE, SQL_LITE_DB)) {
-                echo microtime(true) - $s;
                 @unlink(SQL_LITE_DB_FOR_UPDATE);
             }
         }
     }
 
+    /**
+     * Remove all sqlite helper base
+     */
     private function eraseOldData()
     {
         (new Mapper())->eraseAll();
     }
 
+    /**
+     * Update process which includes
+     * - download last available timetable
+     * - compare hash of downloaded data with hash of data on our server
+     * - update temporary SQLite DB if new data available
+     */
     public function update()
     {
         if ($this->isTimeToUpdate()) {

@@ -15,11 +15,21 @@ class Initializer
     /** @var Initializer */
     private static $instance;
 
+    /**
+     * Initializer constructor.
+     *
+     * @param App $app
+     */
     private function __construct(App $app)
     {
         $this->app = $app;
     }
 
+    /**
+     * @param App $app
+     *
+     * @return Initializer
+     */
     public static function get(App $app): Initializer
     {
         if (!self::$instance) {
@@ -44,22 +54,23 @@ class Initializer
 
     private function initGet()
     {
+        //Without authorization
         $this->app->get('/line-numbers', ZditmController::class . ':linesNumbers');
         $this->app->get('/line/{number}', ZditmController::class . ':line');
     }
 
     private function initPost()
     {
-        $this->app->post('/delay', ZditmController::class . ':delay');
-        $this->app->post('/issue', ZditmController::class . ':issue');
-        $this->app->post('/analyze-nearest-stops', ZditmController::class . ':analyzeNearestStops');
+        //With authorization
+        $this->manageAuth();
+        $this->app->get('/line-numbers', ZditmController::class . ':linesNumbersWithAuth');
+        $this->app->get('/line/{number}', ZditmController::class . ':lineWithAuth');
     }
 
 
     public function run(string $httpMethod)
     {
         $this->setErrorMessagingMode();
-        $this->manageAuth();
         switch (strtoupper($httpMethod)) {
             case 'GET':
                 $this->initGet();
