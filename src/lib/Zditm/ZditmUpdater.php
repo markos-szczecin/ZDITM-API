@@ -42,7 +42,6 @@ class ZditmUpdater
 
     private function __construct()
     {
-        (new Migrate())->migrateTempBase();
     }
 
     public static function get(): ZditmUpdater
@@ -290,24 +289,39 @@ class ZditmUpdater
      * - download last available timetable
      * - compare hash of downloaded data with hash of data on our server
      * - update temporary SQLite DB if new data available
+     *
+     * @return bool
      */
-    public function update()
+    public function update(): bool
     {
+        $error = false;
         if ($this->isTimeToUpdate()) {
             $s = microtime(true);
             ini_set('max_execution_time', 300);
             if ($this->download()) {
-                $this->unzip();
-                $this->eraseOldData();
-                $this->updateLines();
-                $this->updateCalendar();
-                $this->updateCalendarDates();
-                $this->updateShapes();
-                $this->updateTrips();
-                $this->updateStops();
-                $this->updateStopTimes();
+                try {
+                    (new Migrate())->migrateTempBase();
+                    $this->unzip();
+                    $this->eraseOldData();
+                    $this->updateLines();
+                    $this->updateCalendar();
+                    $this->updateCalendarDates();
+                    $this->updateShapes();
+                    $this->updateTrips();
+                    $this->updateStops();
+                    $this->updateStopTimes();
+                } catch (\Throwable $t) {
+                    Logger::errorLog($t->getMessage());
+                    $error = true;
+                }
+            } else {
+                $error = true;
             }
             echo microtime(true) - $s; die;
+        } else {
+            $error = true;
         }
+
+        return !$error;
     }
 }
