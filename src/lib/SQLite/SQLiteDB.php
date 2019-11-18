@@ -19,11 +19,6 @@ class SQLiteDB
      */
     private $pdo;
 
-    const STANDARD_MODE = 1; //normalne użytkownie aplikacji
-    const UPDATE_MODE = 2; //jesteśmy w trakcie aktualizacji bazy danych
-
-    private static $mode = self::STANDARD_MODE;
-
     /**
      * return in instance of the PDO object that connects to the SQLite database
      * @return SQLite3
@@ -47,7 +42,7 @@ class SQLiteDB
     public function getPDO(): SQLite3
     {
         if (!$this->pdo) {
-            if (self::$mode === self::UPDATE_MODE) {
+            if (defined('UPDATE_MODE')) {
                 $this->pdo = new SQLite3( SQL_LITE_DB_FOR_UPDATE);
             }  else {
                 $this->pdo = new SQLite3(SQL_LITE_DB);
@@ -86,24 +81,9 @@ class SQLiteDB
      */
     public function fetchAll(): Generator
     {
-        while ($row = $this->statement->fetch(PDO::FETCH_ASSOC)) {
+        $result = $this->statement->execute();
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             yield $row;
         }
-    }
-
-    /**
-     * Włączenie trybu aktualizacji - operowanie na tymczasowej bazie danych
-     */
-    public static function updateModeOn()
-    {
-        self::$mode = self::UPDATE_MODE;
-    }
-
-    /**
-     * Wyłaczenie trybu aktualizacji - operowanie na standardowej bazie danych
-     */
-    public static function updateModeOff()
-    {
-        self::$mode = self::STANDARD_MODE;
     }
 }

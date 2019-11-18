@@ -125,8 +125,6 @@ class ZditmUpdater
         file_put_contents(DATA_DIR . self::DATA_ZIP_FILE, $zip);
         $this->updateMetaFIle($hash);
 
-        SQLiteDB::updateModeOn();
-
         return true;
     }
 
@@ -287,7 +285,6 @@ class ZditmUpdater
 
     public function update()
     {
-        SQLiteDB::updateModeOn();
         if ($this->isTimeToUpdate()) {
             $s = microtime(true);
             ini_set('max_execution_time', 300);
@@ -304,6 +301,5 @@ class ZditmUpdater
             }
             echo microtime(true) - $s; die;
         }
-        SQLiteDB::updateModeOff();
     }
 }

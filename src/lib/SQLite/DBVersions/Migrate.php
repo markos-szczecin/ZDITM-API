@@ -74,12 +74,10 @@ class Migrate
      */
     public function migrateTempBase()
     {
-        SQLiteDB::updateModeOn();
         $this->loadVersions(true);
         foreach ($this->versionClasses as $class) {
             $class->query();
             $this->loadedVersion = $class->getVersion();
         }
-        SQLiteDB::updateModeOff();
     }
 }

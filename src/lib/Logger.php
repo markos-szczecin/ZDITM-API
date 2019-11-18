@@ -24,7 +24,7 @@ class Logger
         return self::$instance;
     }
 
-    private static function getDir()
+    private static function getDir(): string
     {
         return $_SERVER['DOCUMENT_ROOT'] . '/logs/';
     }
@@ -41,7 +41,7 @@ class Logger
         file_put_contents($dir . 'logger_exceptions.log', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
     }
 
-    public static function errorLog($message, array $context = array())
+    public static function errorLog($message, array $context = []): bool
     {
         try {
             self::getInstance()->pushHandler(new StreamHandler(self::getDir() . 'errors.log', \Monolog\Logger::ERROR));
