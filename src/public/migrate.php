@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Update database structure by analysing available Version[X].php files
+ */
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../config.php';
 

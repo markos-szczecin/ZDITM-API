@@ -39,6 +39,9 @@ class Initializer
         return self::$instance;
     }
 
+    /**
+     * Set error message visible when dev environment
+     */
     private function setErrorMessagingMode()
     {
         if (!defined('ENV') || ENV !== 'dev') {
@@ -52,13 +55,18 @@ class Initializer
         $this->app->add(new AuthMiddleware());
     }
 
+    /**
+     * Activate available GET actions - no authorization required
+     */
     private function initGet()
     {
         //Without authorization
         $this->app->get('/line-numbers', ZditmController::class . ':linesNumbers');
         $this->app->get('/line/{number}', ZditmController::class . ':line');
     }
-
+    /**
+     * Activate available POST actions - authorization required
+     */
     private function initPost()
     {
         //With authorization
@@ -67,7 +75,11 @@ class Initializer
         $this->app->get('/line/{number}', ZditmController::class . ':lineWithAuth');
     }
 
-
+    /**
+     * Start application
+     *
+     * @param string $httpMethod
+     */
     public function run(string $httpMethod)
     {
         $this->setErrorMessagingMode();

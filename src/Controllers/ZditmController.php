@@ -26,6 +26,7 @@ class ZditmController extends BaseController
      */
     public function linesNumbers(Request $request, Response $response)
     {
+        var_dump(2);;die;
         $this->responseData = $this->zditmDownloader->getLinesNumbers();
 
         $response->getBody()->write($this->getResponse());

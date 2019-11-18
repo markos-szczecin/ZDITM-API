@@ -1,5 +1,5 @@
 <?php
-//TODO do crona
+/** Download and update temporary SQLite database Main database remain untouched */
 
 @unlink('sqlite_szczecin_in_touch_temp.db');
 

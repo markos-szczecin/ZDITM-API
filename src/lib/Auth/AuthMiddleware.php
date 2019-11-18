@@ -23,7 +23,7 @@ class AuthMiddleware
 
     private function init()
     {
-        $this->response = $this->requestHandler->handle($this->request);
+        $this->response = new Response();
         $this->params = $this->request->getParsedBody();
     }
 
@@ -58,7 +58,7 @@ class AuthMiddleware
             if (!(new AuthSimple($this->getUserName(), $this->getKey()))->auth()) {
                 throw new AuthException(Text::AUTH_ERROR);
             }
-        } catch (AuthException $e) {;
+        } catch (AuthException $e) {
             echo MyResponse::get()
                 ->setMsg($e->getMessage())
                 ->setStatus(MyResponse::STATUS_ERROR)
